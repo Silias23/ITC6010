@@ -18,8 +18,7 @@ def sentenceBuilder(text,model,keepOld):
     if not keepOld: #check to create seperate sentances with the starting words or continue writing where the last finished
         text = text[:2]
     if keepOld:
-        text = text[-2:]
-
+        text = text[-2:] #if old sentence is kept, then keep the text but keep only the last two words as it is a new sentence (sentences end with None None)
 
     sentence_finished = False
 
@@ -55,7 +54,7 @@ def sentenceBuilder(text,model,keepOld):
                 sentence_finished = True
     
     print (' '.join([t for t in text if t]))
-    return text[2:]
+    return text[2:] 
 
 
 
@@ -125,7 +124,6 @@ def spellcheck(correct_words,incorrect_word,return_max):
     #take list of correct words from dictionary OR model
     #take list of incorrect words flagged by the model
     #take maximum number of duggestions to return
-    
     #return list of most similar words to the incorrect one based on edit distance
 
 
@@ -152,7 +150,6 @@ def spellcheck(correct_words,incorrect_word,return_max):
 def main():
 
     langModel2,langModel3 = modelBuilder() #create the language model based on Reuters corpus
-
     newSentences = [["today", "the"]]
     mixedSentences = []
     for i in range(5):
