@@ -17,6 +17,9 @@ def sentenceBuilder(text,model,keepOld):
 
     if not keepOld: #check to create seperate sentances with the starting words or continue writing where the last finished
         text = text[:2]
+    if keepOld:
+        text = text[-2:]
+
 
     sentence_finished = False
 
@@ -35,7 +38,7 @@ def sentenceBuilder(text,model,keepOld):
 
             if text[-2:] == [None, None]:
                 sentence_finished = True
-    else:
+    elif type(list(model.keys())[1]) == type(str()):
         while not sentence_finished:
         # select a random probability threshold  
             r = random.random()
@@ -52,6 +55,9 @@ def sentenceBuilder(text,model,keepOld):
                 sentence_finished = True
     
     print (' '.join([t for t in text if t]))
+    return text[2:]
+
+
 
 
 def modelBuilder():
@@ -79,7 +85,6 @@ def modelBuilder():
     return model2,model3
 
 
-
 def modelProbabilities(model):
     for w1 in model:
         total_count = float(sum(model[w1].values()))
@@ -90,6 +95,7 @@ def modelProbabilities(model):
 
 
 def preprocess(text):
+    #TODO change everything to lowercase, maybe remove punctuation marks?
     return text
 
 
@@ -98,6 +104,19 @@ def preprocess(text):
 #sorted(dict(model["today","the"]),key=dict(model["today","the"]).get,reverse=True)[:5]
 
 
+def sentenceMixer(sentence,weight):
+    replacement_chars='abcdefghijklmnopqrstuvwxyz'
+    for i in range(int(weight*random.random())): #number of changes to occur
+        r1 = random.randrange(2,len(sentence)-2) #random word to change. cannot be the first two because no trigram match, cannot be the last two because sentence ends in double NoneTypes
+        if len(sentence[r1])==1: #if word is single letter no point in changing it, may be a symbol and will throw off the model
+            continue
+        else:
+            r2 = random.randrange(1,len(sentence[r1])) # select random letter in word
+        char = replacement_chars[random.randint(0,len(replacement_chars)-1)]
+        sentence[r1] = sentence[r1].replace(sentence[r1][r2],char) #replace all instances of the letter with a random letter from the alphabet
+    print(sentence)    
+
+    return sentence
   
 
 
@@ -110,10 +129,6 @@ def spellcheck(correct_words,incorrect_word,return_max):
 
     distance = {}
     suggestions = []
-    #correct_words = words.words()
-    # list of incorrect spellings
-    # that need to be corrected 
-    #incorrect_word=['happpy', 'azmaing', 'intelliengt']
     
     # loop for finding correct spellings
     # based on edit distance and
@@ -136,10 +151,24 @@ def main():
 
     langModel2,langModel3 = modelBuilder() #create the language model based on Reuters corpus
 
-    text = ["the", "president"]
+    newSentences = [["today", "the"]]
+    mixedSentences = []
     for i in range(5):
-        sentenceBuilder(text,langModel3,True)
+        newSentences.append(sentenceBuilder(newSentences[i],langModel3,True))
+    newSentences[0 : 2] = [newSentences[0]+newSentences[1]]
+    for i in range(len(newSentences)):
+        mixedSentences.append(sentenceMixer(newSentences[i],10))
+
+    #TODO create def to find mistakes in sentence
+    # add a df with suggestions based on words() and the two models
+    # OR list all suggestions in prompt for user to select correct word and move forward to next mistake
+    # ^ if this then add setup prompt to create max mistakes per sentence, max sentence to be created etc
+    #TODO maybe handle 1st and 2nd words?
+    #TODO after finding mistake in word load word and model to spelchecker, DIDNT WORK index out of range need to fix
+
+    print(spellcheck(words.words(),['hsppt'],5))
 
 
-main()
-#print(spellcheck(words.words(),['happpy'],5))
+
+if __name__ == '__main__':
+    main()
