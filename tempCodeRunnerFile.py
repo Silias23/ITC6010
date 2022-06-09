@@ -1,7 +1,10 @@
+from re import X, match
 import nltk
 from nltk import bigrams, trigrams
 from collections import Counter, defaultdict
 import random
+from nltk.corpus.reader.chasen import test
+from nltk.corpus.reader.framenet import mimic_wrap
 from nltk.metrics.distance  import edit_distance
 from nltk.corpus import words
 # nltk.download('reuters')
@@ -18,8 +21,7 @@ def sentenceBuilder(text,model,keepOld):
     if not keepOld: #check to create seperate sentances with the starting words or continue writing where the last finished
         text = text[:2]
     if keepOld:
-        text = text[-2:]
-
+        text = text[-2:] #if old sentence is kept, then keep the text but keep only the last two words as it is a new sentence (sentences end with None None)
 
     sentence_finished = False
 
@@ -55,34 +57,38 @@ def sentenceBuilder(text,model,keepOld):
                 sentence_finished = True
     
     print (' '.join([t for t in text if t]))
-    return text[2:]
+    return text[2:] 
 
 
 
 
-def modelBuilder():
-
-    # Create a placeholder for model
-    model3 = defaultdict(lambda: defaultdict(lambda: 0))
-    model2 = defaultdict(lambda: defaultdict(lambda: 0))
-
-    corpus = preprocess(nltk.corpus.reuters.sents())
+def modelBuilder(corp):
 
 
-    # Count frequency of co-occurance  
-    for sentence in corpus:
-        for w1, w2, w3 in trigrams(sentence, pad_right=True, pad_left=True):
-            model3[(w1, w2)][w3] += 1 #a tuple of the first two words is used as the key and the third
-        for w1, w2 in bigrams(sentence, pad_right=True, pad_left=True):
-            model2[w1][w2] += 1 #a tuple of the first two words is used as the key and the third
+    corpus = preprocess(corp)
+    model2,model3 = frequencies(corpus)
     
     # Let's transform the counts to probabilities
-
     model2 = modelProbabilities(model2)
     model3 = modelProbabilities(model3)
     print('Models Created')
 
     return model2,model3
+
+
+def frequencies(sentences):
+    # Create a placeholder for model
+    trigram = defaultdict(lambda: defaultdict(lambda: 0))
+    bigram = defaultdict(lambda: defaultdict(lambda: 0))
+
+    # Count frequency of co-occurance  
+    for sentence in sentences:
+        for w1, w2, w3 in trigrams(sentence, pad_right=True, pad_left=True):
+            trigram[(w1, w2)][w3] += 1 #a tuple of the first two words is used as the key and the third
+        for w1, w2 in bigrams(sentence, pad_right=True, pad_left=True):
+            bigram[w1][w2] += 1 #a tuple of the first two words is used as the key and the third
+    
+    return bigram,trigram
 
 
 def modelProbabilities(model):
@@ -95,8 +101,15 @@ def modelProbabilities(model):
 
 
 def preprocess(text):
+    b=[]
     #TODO change everything to lowercase, maybe remove punctuation marks?
-    return text
+    for sentence in text:
+        # for i in range(len(sentence)):
+        #     sentence[i] = sentence[i].lower()
+        #print(text)
+        a = (map(lambda x: x.lower(), sentence))
+        b.append(list(a))
+    return b
 
 
 
@@ -111,8 +124,17 @@ def sentenceMixer(sentence,weight):
         if len(sentence[r1])==1: #if word is single letter no point in changing it, may be a symbol and will throw off the model
             continue
         else:
-            r2 = random.randrange(1,len(sentence[r1])) # select random letter in word
-        sentence[r1] = sentence[r1].replace(sentence[r1][r2],replacement_chars[random.randint(0,len(replacement_chars))]) #replace all instances of the letter with a random letter from the alphabet
+            r2 = random.randrange(1,len(sentence[r1])) # select random position in word
+            r3 = random.randint(0,2)
+            if r3 == 0:
+                char = replacement_chars[random.randint(0,len(replacement_chars)-1)]
+                sentence[r1] = sentence[r1].replace(sentence[r1][r2],char) #replace all instances of the letter with a random letter from the alphabet
+            elif r3 == 1:
+                sentence[r1] = sentence[r1][:r2] + sentence[r1][r2+1:] #remove character at random index
+            elif r3 == 2:
+                char = replacement_chars[random.randint(0,len(replacement_chars)-1)] #add character at random index
+                sentence[r1] = sentence[r1][:r2] + char + sentence[r1][r2+1:]
+
     print(sentence)    
 
     return sentence
@@ -126,6 +148,7 @@ def spellcheck(correct_words,incorrect_word,return_max):
     #take maximum number of duggestions to return
     #return list of most similar words to the incorrect one based on edit distance
 
+
     distance = {}
     suggestions = []
     
@@ -138,25 +161,51 @@ def spellcheck(correct_words,incorrect_word,return_max):
                 distance[w] = edit_distance(word, w)
         #print(sorted(distance, key = lambda val:val[0])[0][1]) #return top closest match words
         sorted_suggestions = sorted(distance.items(), key = lambda val:val[1])
-        for i in range(return_max):
-            suggestions.append(sorted_suggestions[i][0]) #append to list the top words with lowest edit distance
+    for i in range(min(return_max,len(sorted_suggestions))):
+        suggestions.append(sorted_suggestions[i][0]) #append to list the top words with lowest edit distance
 
     return suggestions #list
+
+
+def mistakeFinder(sentence,bigram,trigram):
+
+
+    sentence = list(filter(None,sentence))
+
+    i=0
+    for w1, w2, w3 in trigrams(sentence, pad_right=True):
+        i += 1
+        if w3 not in list(trigram[(w1,w2)].keys()):
+            correctWord = spellcheck(list(trigram[(w1,w2)].keys()),[w3],5)
+            sentence = sentence[:i+1]+[correctWord[0]]+sentence[i+2:]
+            print(f'Wrong word:{w3}, Corrected:{correctWord}')
+            return sentence,False
+        else:
+            continue
+    return sentence,True
+
+                
 
 
 
 
 def main():
 
-    langModel2,langModel3 = modelBuilder() #create the language model based on Reuters corpus
-
+    langModel2,langModel3 = modelBuilder(nltk.corpus.reuters.sents()) #create the language model based on Reuters corpus
     newSentences = [["today", "the"]]
     mixedSentences = []
     for i in range(5):
         newSentences.append(sentenceBuilder(newSentences[i],langModel3,True))
     newSentences[0 : 2] = [newSentences[0]+newSentences[1]]
     for i in range(len(newSentences)):
-        mixedSentences.append(sentenceMixer(newSentences[i],10))
+        mixedSentences.append(sentenceMixer(newSentences[i],5))
+    for i in range(len(mixedSentences)):
+        done = False
+        while not done:
+            mixedSentences[i],done = mistakeFinder(mixedSentences[i],langModel2,langModel3)
+        print('done')
+
+
 
     #TODO create def to find mistakes in sentence
     # add a df with suggestions based on words() and the two models

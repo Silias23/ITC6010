@@ -119,7 +119,7 @@ def preprocess(text):
 
 def sentenceMixer(sentence,weight):
     replacement_chars='abcdefghijklmnopqrstuvwxyz'
-    for i in range(int(weight*random.random())): #number of changes to occur
+    for i in range(int(weight*random.random())): #number of changes to occur random used to change errors in sentence dynamically, max being weight*1
         r1 = random.randrange(2,len(sentence)-2) #random word to change. cannot be the first two because no trigram match, cannot be the last two because sentence ends in double NoneTypes
         if len(sentence[r1])==1: #if word is single letter no point in changing it, may be a symbol and will throw off the model
             continue
@@ -198,7 +198,7 @@ def main():
         newSentences.append(sentenceBuilder(newSentences[i],langModel3,True))
     newSentences[0 : 2] = [newSentences[0]+newSentences[1]]
     for i in range(len(newSentences)):
-        mixedSentences.append(sentenceMixer(newSentences[i],5))
+        mixedSentences.append(sentenceMixer(newSentences[i],20))
     for i in range(len(mixedSentences)):
         done = False
         while not done:
