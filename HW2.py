@@ -123,6 +123,8 @@ def sentenceMixer(sentence,weight):
         r1 = random.randrange(2,len(sentence)-2) #random word to change. cannot be the first two because no trigram match, cannot be the last two because sentence ends in double NoneTypes
         if len(sentence[r1])==1: #if word is single letter no point in changing it, may be a symbol and will throw off the model
             continue
+        elif sentence[r1].isdigit():
+            continue
         else:
             r2 = random.randrange(1,len(sentence[r1])) # select random position in word
             r3 = random.randint(0,2)
@@ -157,8 +159,11 @@ def spellcheck(correct_words,incorrect_word,return_max):
     # printing the correct words
     for word in incorrect_word:
         for w in correct_words:
-            if w[0]==word[0]:
-                distance[w] = edit_distance(word, w)
+            try:
+                if w[0]==word[0]:
+                    distance[w] = edit_distance(word, w)
+            except:
+                continue
         #print(sorted(distance, key = lambda val:val[0])[0][1]) #return top closest match words
         sorted_suggestions = sorted(distance.items(), key = lambda val:val[1])
     for i in range(min(return_max,len(sorted_suggestions))):
@@ -177,7 +182,8 @@ def mistakeFinder(sentence,bigram,trigram):
         i += 1
         if w3 not in list(trigram[(w1,w2)].keys()):
             correctWord = spellcheck(list(trigram[(w1,w2)].keys()),[w3],5)
-            sentence = sentence[:i+1]+[correctWord[0]]+sentence[i+2:]
+            c = userprompt(w3,correctWord)
+            sentence = sentence[:i+1]+[correctWord[c-1]]+sentence[i+2:]
             print(f'Wrong word:{w3}, Corrected:{correctWord}')
             return sentence,False
         else:
@@ -185,8 +191,24 @@ def mistakeFinder(sentence,bigram,trigram):
     return sentence,True
 
                 
+def userprompt(w3,correctWord):
+    print(f'Incorrect word found: {w3} \n please type the number corresponding to the correct word:')
 
-
+    while True:
+        for j in range(len(correctWord)):
+            print(f'{j+1}. {correctWord[j]}')  
+        try:      
+            c = int(input())
+        except:
+            print("Please select a number")
+            continue
+        if c>len(correctWord):
+            print("invalid number. Please select one from the options:")
+            continue
+        else:
+            break
+        
+    return c
 
 
 def main():
