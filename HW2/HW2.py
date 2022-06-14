@@ -27,10 +27,6 @@ from nltk.corpus import words
 # nltk.download('words')
 
 
-
-
-
-
 def sentenceBuilder(text,model,keepOld):
     #used to create the random sentences based off the model
     #output is sentence
@@ -73,10 +69,7 @@ def sentenceBuilder(text,model,keepOld):
             if text[-1:] == [None]:
                 sentence_finished = True
     
-
     return text[2:] 
-
-
 
 
 def modelBuilder(corp):
@@ -94,7 +87,6 @@ def modelBuilder(corp):
     model3 = modelProbabilities(model3)
     print('Models Created')
     
-
     return model2,model3
 
 
@@ -110,6 +102,7 @@ def frequencies(sentences):
         for w1, w2 in bigrams(sentence, pad_right=True, pad_left=True):
             bigram[w1][w2] += 1 #a single word is used as the key for the bigrams
     
+    # import pandas as pd
     # df = pd.DataFrame(columns=('bigram','frequency'))
     # for key in bigram.keys():
     #     c = 0
@@ -119,8 +112,6 @@ def frequencies(sentences):
     #     df=df.append(new_row, ignore_index=True)   
         
     return bigram,trigram
-import pandas as pd
-
 
 
 def modelProbabilities(model):
@@ -252,7 +243,6 @@ def userprompt(w3,correctWord):
             continue
         else:
             break
-        
     return c
 
 
@@ -335,7 +325,7 @@ def setup():
 def main():
     numSentence,errorWeight,maxsuggestions,automode,StartNew = setup()
     langModel2,langModel3 = modelBuilder(nltk.corpus.reuters.sents()) #create the language model based on Reuters corpus
-    newSentences = [["the", "company"]]
+    newSentences = [["today", "the"]]
     mixedSentences = []
     for i in range(numSentence):
         newSentences.append(sentenceBuilder(newSentences[i],langModel3,StartNew))
@@ -353,15 +343,7 @@ def main():
         print('---------------------------------')
 
 
-
-    #TODO create def to find mistakes in sentence DONE
-    # add a df with suggestions based on words() and the two models 
-    # OR list all suggestions in prompt for user to select correct word and move forward to next mistake DONE
-    # ^ if this then add setup prompt to create max mistakes per sentence, max sentence to be created etc
-    #TODO maybe handle 1st and 2nd words?
-    #TODO after finding mistake in word load word and model to spelchecker, DIDNT WORK index out of range need to fix DONE
-
-    print(spellcheck(words.words(),['hsppt'],5))
+    #print(spellcheck(words.words(),['hsppt'],5))
 
 
 
