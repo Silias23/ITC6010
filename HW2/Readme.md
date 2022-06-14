@@ -1,12 +1,21 @@
 Ilias Siafakas
+
 ITC6010A1
+
 Natural Language Processing
+
 Dr. Lazaros Polymenakos
+
 6/10/2022
+
 Requirements:
+
 Python 3.9.5 or later
+
 NLTK ‘Reuters’, ‘Punkt’, ‘Words’ download
+
 Run instructions:
+
 Execute HW2.py and run setup shown in the terminal. In case of small generated sentences or infinite loading, please restart the program. Maximum expected model building time: 50s
 
 Goal
