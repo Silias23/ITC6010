@@ -1,5 +1,3 @@
-
-
 #"""
 # Run Instructions:
 # run HW2.py
@@ -203,7 +201,7 @@ def spellcheck(correct_words,incorrect_word,return_max):
                 distance[sorted_distance[i][0]]=sorted_distance[i][1]    #if word exists in both models then the suggestion list will be one short. suggestions get MERGED not ADDED
 
         sorted_suggestions = sorted(distance.items(), key = lambda val:val[1])
-    for i in range(min(return_max,len(sorted_suggestions))):
+    for i in range(min(return_max,len(sorted_suggestions))): #min() used for error handling in case words() model does not return adequate results
         suggestions.append(sorted_suggestions[i][0]) #append to list the top words with lowest edit distance
         
 
@@ -223,7 +221,7 @@ def mistakeFinder(sentence,bigram,trigram,max_sugg,auto):
         i += 1
         if w3 not in list(trigram[(w1,w2)].keys()):
             correctWord = spellcheck(list(trigram[(w1,w2)].keys()),[w3],max_sugg)
-            if auto:
+            if auto: #auto always uses the first siggested word -- the one with smallest edit distance
                 c = 1
             else:
                 c = userprompt(w3,correctWord)
@@ -242,13 +240,14 @@ def userprompt(w3,correctWord):
 
     while True:
         for j in range(len(correctWord)):
-            print(f'{j+1}. {correctWord[j]}')  
+            print(f'{j+1}. {correctWord[j]}')  #print all suggestions
+
         try:      
             c = int(input())
         except:
             print("Please select a number")
             continue
-        if c>len(correctWord):
+        if c>len(correctWord) and c < 0 :
             print("invalid number. Please select one from the options:")
             continue
         else:
@@ -316,18 +315,18 @@ def setup():
             continue
     while True:
         try:
-            print('Do you want to enable autorun? (experimental)\n(the program will automatically choose the first suggestion for each word with a mistake)\nType (T)rue or (F)alse')
+            print('Do you want to enable autorun? (experimental)\n(the program will automatically choose the first suggestion for each word with a mistake)\nType (Y)es or (N)o')
             auto = input()
         except:
-            print("Please type (T)rue or (F)alse")
-        if auto in ['f','False','F','0']:
+            print("Please type (Y)es (N)o")
+        if auto in ['n','N','No','0']:
             auto = False
             break
-        elif auto in ['t','True','T','1']:
+        elif auto in ['y','Y','Yes','1']:
             auto = True
             break
         else:
-            print("Please type (T)rue or (F)alse")
+            print("Please type (Y)es (N)o")
             continue
 
     print('Setup Complete')
