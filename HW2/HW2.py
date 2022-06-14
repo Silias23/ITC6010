@@ -138,7 +138,7 @@ def sentenceMixer(sentence,weight):
     #reverse edit distance to mix the characters in each word
     replacement_chars='abcdefghijklmnopqrstuvwxyz'
 
-    for i in range(int(weight*random.random())): #number of changes to occur random used to change errors in sentence dynamically, max being weight*1
+    for i in range(int(weight*10*random.random())): #number of changes to occur random used to change errors in sentence dynamically, max being weight*1
         r1 = random.randrange(2,len(sentence)-2) #random word to change. cannot be the first two because no trigram match, cannot be the last two because sentence ends in double NoneTypes
         if len(sentence[r1])==1: #if word is single letter no point in changing it, may be a symbol and will throw off the model
             continue
@@ -283,14 +283,14 @@ def setup():
                 continue
     while True:
         try:
-            print("please specify the weight of mistakes for each sentence \n(e.g. \'20\' sets the maximum number of insertions/deletions/substitutions to 20)\nDefault:20, Max:50")
+            print("please specify the weight of mistakes for each sentence \n(e.g. \'2\' sets the maximum number of insertions/deletions/substitutions to 20)\nDefault:2, Max:5")
             error = int(input())
         except:
             print("Please insert a number")
-        if error >= 1 and error <= 50:
+        if error >= 1 and error <= 5:
             break
         else:
-            print("Number must be between 1 and 50")
+            print("Number must be between 1 and 5")
             continue
     while True:
         try:
