@@ -4,6 +4,12 @@ import nltk
 # nltk.download('wordnet')
 # nltk.download('omw-1.4')
 
+
+'''
+DOWNLOAD DATA FROM https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
+AND FIX THE read_csv() line to correct directory
+'''
+
 def merge_columns(df):
     #used to merge the title and the text to one single column for processing
 
