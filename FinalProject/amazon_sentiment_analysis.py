@@ -21,6 +21,7 @@ import matplotlib.pyplot as plt
 
 """
 Dataset downloaded from: https://www.kaggle.com/datasets/kritanjalijain/amazon-reviews
+and extract test.csv and train.csv into the 'data' folder
 """
 
 
