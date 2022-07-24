@@ -3,3 +3,5 @@ checkio.py
 FinalProject/train.csv
 FinalProject/Amazon_Reviews_Sentiment.py
 FinalProject/test.csv
+FinalProject/data/train.csv
+FinalProject/data/test.csv
